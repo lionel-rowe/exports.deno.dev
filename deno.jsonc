@@ -2,7 +2,7 @@
 	"lock": false,
 	"tasks": {
 		// this is a comment
-		"start": "deno run -A --unstable --watch main.ts",
+		"start": "deno run -A --unstable-kv --watch main.ts",
 		"xss_": "<img src onerror=alert(1)>"
 	},
 	"imports": {},

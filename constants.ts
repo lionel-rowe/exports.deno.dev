@@ -1,6 +1,6 @@
 const CHARSET = 'charset=utf-8'
 const ContentType = {
-	Js: `application/javascript; ${CHARSET}`,
+	Js: `text/javascript; ${CHARSET}`,
 	Json: `application/json; ${CHARSET}`,
 	Html: `text/html; ${CHARSET}`,
 } as const

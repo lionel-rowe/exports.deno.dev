@@ -16,7 +16,7 @@ export const demoPageHtml = `
 		<head>
 			<meta charset="utf-8">
 			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<title>Demo</title>
+			<title>exports.deno.dev</title>
 		</head>
 		<body>
 			<div id="target">Loading...</div>
@@ -29,22 +29,22 @@ async function demo(pathPrefix: string, jsoncSource: string) {
 	const target = document.querySelector('#target')!
 
 	const denoStdRoot = 'https://deno.land/std@0.211.0'
+	const jsUrlPrefix = `${globalThis.location.origin}${pathPrefix}`
 
-	function getUrls(tsUrl: string) {
-		const compiledUrl = `${globalThis.location.origin}${pathPrefix}${tsUrl}`
+	async function getModule(tsUrl: string) {
+		const js = `${jsUrlPrefix}${tsUrl}`
 
-		return { tsUrl, compiledUrl }
+		return { ts: tsUrl, js, mod: await import(js) }
 	}
 
-	const yaml = getUrls(`${denoStdRoot}/yaml/mod.ts`)
-	const jsonc = getUrls(`${denoStdRoot}/jsonc/mod.ts`)
-	const html = getUrls(`${denoStdRoot}/html/mod.ts`)
-	const m = getUrls('https://raw.githubusercontent.com/markedjs/marked/9514a93/src/marked.ts')
+	const [$yaml, $jsonc, $html, $marked] = await Promise.all([
+		`${denoStdRoot}/yaml/mod.ts`,
+		`${denoStdRoot}/jsonc/mod.ts`,
+		`${denoStdRoot}/html/mod.ts`,
+		'https://raw.githubusercontent.com/markedjs/marked/9514a93/src/marked.ts',
+	].map(getModule))
 
-	const { stringify } = await import(yaml.compiledUrl)
-	const { parse } = await import(jsonc.compiledUrl)
-	const { escape } = await import(html.compiledUrl)
-	const { marked } = await import(m.compiledUrl)
+	const { marked } = $marked.mod
 
 	const renderer = new marked.Renderer()
 
@@ -55,15 +55,15 @@ async function demo(pathPrefix: string, jsoncSource: string) {
 
 	marked.setOptions({ renderer })
 
-	const data = parse(jsoncSource)
-	const output = stringify(data, { indent: 4 })
+	const data = $jsonc.mod.parse(jsoncSource)
+	const output = $yaml.mod.stringify(data, { indent: 4 })
 
 	target.innerHTML = marked(
 		`
 # ${'`exports.deno.dev`'}
 
 Import TypeScript directly from front-end JavaScript (via ESM imports). Prepend ${
-			'`' + getUrls('').compiledUrl + '`'
+			'`' + jsUrlPrefix + '`'
 		} to a TypeScript URL to import.
 
 TypeScript files are compiled on-the-fly upon first import, then cached. Because of this, versioned permalinks should always be used, as non-versioned URLs are liable to return stale code from the cache.
@@ -72,21 +72,19 @@ TypeScript files are compiled on-the-fly upon first import, then cached. Because
 
 ${'```js'}
 // static
-import { parse } from "${jsonc.compiledUrl}"
-import { marked } from "${m.compiledUrl}"
+import * as jsonc from '${$jsonc.js}'
+import { marked } from '${$marked.js}'
 
 // dynamic
-const { escape } = await import("${html.compiledUrl}")
-const { stringify } = await import("${yaml.compiledUrl}")
+const html = await import('${$html.js}')
+const yaml = await import('${$yaml.js}')
 ${'```'}
 
 ## Demo
 
-Converting JSONC to YAML, using ${'`deno_std`'}’s [${'`jsonc`'}](${jsonc.tsUrl}) and [${'`yaml`'}](${yaml.tsUrl}) modules, along with [${'`html`'}](${html.tsUrl}) for sanitization.
+Converting JSONC to YAML, using ${'`deno_std`'}’s [${'`jsonc`'}](${$jsonc.ts}) and [${'`yaml`'}](${$yaml.ts}) modules, along with [${'`html`'}](${$html.ts}) for sanitization.
 
-<pre>
-${escape(output)}
-</pre>
+<pre><code class="language-yaml">${$html.mod.escape(output)}</code></pre>
 `,
 	)
 }

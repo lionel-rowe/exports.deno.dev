@@ -8,10 +8,10 @@ TypeScript files are compiled on-the-fly upon first import, then cached. Because
 
 ```js
 // static
-import { parse } from "https://exports.deno.dev/s/https://deno.land/std@0.211.0/jsonc/mod.ts"
-import { marked } from "https://exports.deno.dev/s/https://raw.githubusercontent.com/markedjs/marked/9514a93/src/marked.ts"
+import * as jsonc from 'https://exports.deno.dev/s/https://deno.land/std@0.211.0/jsonc/mod.ts'
+import { marked } from 'https://exports.deno.dev/s/https://raw.githubusercontent.com/markedjs/marked/9514a93/src/marked.ts'
 
 // dynamic
-const { escape } = await import("https://exports.deno.dev/s/https://deno.land/std@0.211.0/html/mod.ts")
-const { stringify } = await import("https://exports.deno.dev/s/https://deno.land/std@0.211.0/yaml/mod.ts")
+const html = await import('https://exports.deno.dev/s/https://deno.land/std@0.211.0/html/mod.ts')
+const yaml = await import('https://exports.deno.dev/s/https://deno.land/std@0.211.0/yaml/mod.ts')
 ```
