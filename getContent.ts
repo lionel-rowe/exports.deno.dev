@@ -1,4 +1,4 @@
-import { transpile } from 'https://deno.land/x/emit@0.34.0/mod.ts'
+import { transpile } from 'https://deno.land/x/emit@0.24.0/mod.ts'
 import { escape } from 'https://deno.land/std@0.211.0/regexp/escape.ts'
 import { get, set } from 'https://deno.land/x/kv_toolbox@0.0.6/blob.ts'
 import { JS_HEADERS, JSON_HEADERS, ONE_YEAR_IN_MILLISECONDS, PATH_PREFIX } from './constants.ts'
