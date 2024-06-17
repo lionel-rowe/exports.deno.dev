@@ -1,3 +1,4 @@
+// TODO: use latest version (currently breaks on Deno Deploy)
 import { transpile } from 'https://deno.land/x/emit@0.24.0/mod.ts'
 import { escape } from 'https://deno.land/std@0.211.0/regexp/escape.ts'
 import { get, set } from 'https://deno.land/x/kv_toolbox@0.0.6/blob.ts'
@@ -27,6 +28,20 @@ const cache = {
 	},
 }
 
+// TODO: remove this horrible hack
+function postProcess(jsInput: Uint8Array | string) {
+	const js = typeof jsInput === 'string' ? jsInput : new TextDecoder().decode(jsInput)
+
+	return js.replaceAll(
+		new RegExp(
+			String
+				.raw`(?<before>(^|[\n;])import\s+[\w$]+\s+from\s+(?<quot>['"])[^'"]+(\k<quot>)\s+)assert(?<after>\s+\{)`,
+			'gu',
+		),
+		'$<before>with$<after>',
+	)
+}
+
 export async function getContent(scriptUrl: URL, reqUrl: URL) {
 	if (scriptUrl.pathname.endsWith('.json')) {
 		const res = await fetch(scriptUrl)
@@ -44,7 +59,7 @@ export async function getContent(scriptUrl: URL, reqUrl: URL) {
 
 	const cached = await cache.get(scriptUrl.href)
 	if (cached != null) {
-		return new Response(cached, { headers: JS_HEADERS })
+		return new Response(postProcess(cached), { headers: JS_HEADERS })
 	}
 
 	// // ?edd-import-map=<IMPORT_MAP_URL>
@@ -89,5 +104,5 @@ export async function getContent(scriptUrl: URL, reqUrl: URL) {
 		return cache.set(resultHref, code)
 	}))
 
-	return new Response((await cache.get(scriptUrl.href))!, { headers: JS_HEADERS })
+	return new Response(postProcess((await cache.get(scriptUrl.href))!), { headers: JS_HEADERS })
 }
