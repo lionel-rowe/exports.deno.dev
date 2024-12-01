@@ -2,10 +2,15 @@
 	"lock": false,
 	"tasks": {
 		// this is a comment
-		"start": "deno run -A --unstable-kv --watch main.ts",
+		"start": "deno run -A --unstable-kv --unstable-temporal --watch main.ts",
 		"xss_": "<img src onerror=alert(1)>"
 	},
-	"imports": {},
+	"imports": {
+		"@deno/emit": "jsr:@deno/emit@^0.46.0",
+		"@kitsonk/kv-toolbox": "jsr:@kitsonk/kv-toolbox@^0.24.0",
+		"@li/regexp-escape-polyfill": "jsr:@li/regexp-escape-polyfill@^0.3.4",
+		"@std/http": "jsr:@std/http@^1.0.11"
+	},
 	"fmt": {
 		"semiColons": false,
 		"useTabs": true,

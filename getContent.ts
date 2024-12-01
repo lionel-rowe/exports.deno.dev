@@ -1,12 +1,12 @@
 // TODO: use latest version (currently breaks on Deno Deploy)
-import { transpile } from 'https://deno.land/x/emit@0.24.0/mod.ts'
-import { escape } from 'https://deno.land/std@0.211.0/regexp/escape.ts'
-import { get, set } from 'https://deno.land/x/kv_toolbox@0.0.6/blob.ts'
+import { transpile } from './deno_emit/js/mod.ts'
+import { regExpEscape } from '@li/regexp-escape-polyfill'
+import { get, set } from '@kitsonk/kv-toolbox/blob'
 import { JS_HEADERS, JSON_HEADERS, ONE_YEAR_IN_MILLISECONDS, PATH_PREFIX } from './constants.ts'
 
 const kv = await Deno.openKv()
 
-const oldPrefixes = [['v1'], ['files']]
+const oldPrefixes = [['v1'], ['files'], ['v2']]
 // delete old versions
 for (const prefix of oldPrefixes) {
 	for await (const entry of kv.list({ prefix })) {
@@ -14,15 +14,15 @@ for (const prefix of oldPrefixes) {
 	}
 }
 
-const CURRENT_VERSION = 'v2'
+const CURRENT_VERSION = 'v3'
 const KEY_PREFIX = [CURRENT_VERSION, 'files'] as const
 
 const cache = {
-	get(href: string) {
-		return get(kv, [...KEY_PREFIX, href], { consistency: 'strong' })
+	async get(href: string) {
+		return (await get(kv, [...KEY_PREFIX, href], { consistency: 'strong' })).value
 	},
-	set(href: string, content: string) {
-		return set(kv, [...KEY_PREFIX, href], new TextEncoder().encode(content), {
+	async set(href: string, content: string) {
+		return await set(kv, [...KEY_PREFIX, href], new TextEncoder().encode(content), {
 			expireIn: ONE_YEAR_IN_MILLISECONDS,
 		})
 	},
@@ -69,6 +69,7 @@ export async function getContent(scriptUrl: URL, reqUrl: URL) {
 
 	const result = await transpile(scriptUrl, {
 		// importMap,
+		cache: false,
 	})
 
 	const groupKeys = ['quot', 'href'] as const
@@ -80,7 +81,7 @@ export async function getContent(scriptUrl: URL, reqUrl: URL) {
 				try {
 					const u = new URL(x)
 
-					return `[^'"]*${escape(u.href.slice(u.origin.length))}`
+					return `[^'"]*${regExpEscape(u.href.slice(u.origin.length))}`
 				} catch {
 					return null
 				}

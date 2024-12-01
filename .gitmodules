@@ -1,0 +1,3 @@
+[submodule "deno_emit"]
+	path = deno_emit
+	url = https://github.com/lionel-rowe/deno_emit

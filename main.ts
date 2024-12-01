@@ -7,8 +7,7 @@ if (!Deno.permissions.querySync) {
 }
 // End horrible hack
 
-import 'https://esm.sh/v131/temporal-polyfill@0.1.1/dist/global.mjs'
-import { STATUS_CODE, STATUS_TEXT } from 'https://deno.land/std@0.211.0/http/status.ts'
+import { STATUS_CODE, STATUS_TEXT } from '@std/http/status'
 import { demoPageHtml } from './demo.ts'
 import { getContent } from './getContent.ts'
 import { ALLOWED_PROTOCOLS, HTML_HEADERS, JSON_HEADERS, PATH_PREFIX } from './constants.ts'
