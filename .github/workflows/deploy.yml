@@ -1,9 +1,9 @@
 name: Deploy
 
 on:
-  push:
-    branches:
-      - main
+    push:
+        branches:
+            - main
 
 jobs:
     deploy:
@@ -17,9 +17,9 @@ jobs:
         steps:
             - name: Clone repository
               uses: actions/checkout@v4
-              with:
-                  submodules: 'true'
-              
+            #   with:
+            #       submodules: 'true'
+
             - name: Set up Deno
               uses: denoland/setup-deno@v1
               with:
