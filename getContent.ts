@@ -4,21 +4,6 @@ import { regExpEscape } from '@li/regexp-escape-polyfill'
 import { get, set } from '@kitsonk/kv-toolbox/blob'
 import { JS_HEADERS, JSON_HEADERS, ONE_YEAR_IN_MILLISECONDS, PATH_PREFIX } from './constants.ts'
 
-// workaround for https://github.com/denoland/deno_cache_dir/issues/35
-// (deno_cache_dir is a dependency of @deno/emit)
-Deno.permissions.querySync ??= () => {
-	return {
-		state: 'denied',
-		onchange: null,
-		partial: false,
-		addEventListener() {},
-		removeEventListener() {},
-		dispatchEvent() {
-			return false
-		},
-	}
-}
-
 const kv = await Deno.openKv()
 
 const oldPrefixes = [['v1'], ['files'], ['v2']]

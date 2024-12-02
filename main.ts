@@ -1,12 +1,4 @@
-// https://github.com/denoland/deploy_feedback/issues/527#issuecomment-1774129816
-// Horrible hack in order to fix `Deno.permissions.querySync` not being defined
-if (!Deno.permissions.querySync) {
-	;(Deno.permissions as unknown as Record<string, unknown>)['querySync'] = (
-		_pd: Deno.PermissionDescriptor,
-	): { state: string } => ({ state: 'granted' })
-}
-// End horrible hack
-
+import './denoPermissionsQuerySyncPolyfill.ts'
 import { STATUS_CODE, STATUS_TEXT } from '@std/http/status'
 import { demoPageHtml } from './demo.ts'
 import { getContent } from './getContent.ts'
