@@ -89,7 +89,7 @@ export async function getContent(scriptUrl: URL, reqUrl: URL) {
 		'gu',
 	)
 
-	await Promise.all([...result.entries()].map(([resultHref, content]) => {
+	await Promise.all([...result].map(([resultHref, content]) => {
 		const code = `/// <reference types="${resultHref}" />\n\n${
 			content
 				.replaceAll(urlMatcher, (...args) => {

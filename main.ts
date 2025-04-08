@@ -1,5 +1,6 @@
 import './denoPermissionsQuerySyncPolyfill.ts'
 import { STATUS_CODE, STATUS_TEXT } from '@std/http/status'
+import { normalize } from '@std/path/posix'
 import { demoPageHtml } from './demo.ts'
 import { getContent } from './getContent.ts'
 import { ALLOWED_PROTOCOLS, HTML_HEADERS, JSON_HEADERS, PATH_PREFIX } from './constants.ts'
@@ -39,6 +40,16 @@ Deno.serve(async (req: Request) => {
 		}
 	}
 
+	if (scriptUrl.protocol === 'jsr:') {
+		scriptUrl = await jsrToHttps(scriptUrl)
+
+		const redirectTo = reqUrl.origin + PATH_PREFIX + scriptUrl.href
+		return Response.redirect(
+			redirectTo,
+			STATUS_CODE.TemporaryRedirect,
+		)
+	}
+
 	try {
 		return await getContent(scriptUrl, reqUrl)
 	} catch (e) {
@@ -49,3 +60,28 @@ Deno.serve(async (req: Request) => {
 		})
 	}
 })
+
+async function jsrToHttps(url: URL | string): Promise<URL> {
+	const { pathname } = new URL(url)
+
+	const m = pathname.match(/^@(?<scope>[^/@]+)\/(?<name>[^/@]+)(?:@(?<version>[^/@]+))?(?:\/(?<subpath>.+))?$/)
+	if (!m) {
+		throw new Error(`Invalid jsr URL: ${url}`)
+	}
+	let { scope, name, version, subpath } = m.groups!
+
+	if (!version) {
+		const { latest } = await (await fetch(`https://jsr.io/@${scope}/${name}/meta.json`)).json()
+		version = latest
+	}
+
+	const meta = await (await fetch(`https://jsr.io/@${scope}/${name}/${version}_meta.json`)).json()
+	const exp = Object.entries(meta.exports).find(([k]) => normalize(k) === normalize(subpath ?? ''))
+	if (!exp) {
+		throw new Error(`Invalid jsr URL: ${url}`)
+	}
+	const path = exp[1]
+
+	const resolved = new URL(`https://jsr.io/@${scope}/${name}/${version}/${path}`)
+	return resolved
+}

@@ -23,7 +23,7 @@ export const HTML_HEADERS = {
 } as const
 
 // TODO: properly allow jsr, npm, etc.
-export const ALLOWED_PROTOCOLS = (['http', 'https'] as const).map((x) => `${x}:` as const)
+export const ALLOWED_PROTOCOLS = (['http', 'https', 'jsr'] as const).map((x) => `${x}:` as const)
 
 export const PATH_PREFIX = '/s/'
 

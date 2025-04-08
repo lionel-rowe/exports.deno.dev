@@ -9,7 +9,8 @@
 		"@deno/emit": "jsr:@deno/emit@^0.46.0",
 		"@kitsonk/kv-toolbox": "jsr:@kitsonk/kv-toolbox@^0.24.0",
 		"@li/regexp-escape-polyfill": "jsr:@li/regexp-escape-polyfill@^0.3.4",
-		"@std/http": "jsr:@std/http@^1.0.11"
+		"@std/http": "jsr:@std/http@^1.0.11",
+		"@std/path": "jsr:@std/path@^1.0.8"
 	},
 	"fmt": {
 		"semiColons": false,
